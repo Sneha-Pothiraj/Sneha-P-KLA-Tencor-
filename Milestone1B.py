@@ -11,7 +11,7 @@ class Task():
 
     def TimeFunction(self, fnc_input, execution_time, task_name, execution_type, string):
         # if(execution_type == 'Sequential'):
-        with open('logfile.txt', 'a', newline='') as file:
+        with open('logfile1B.txt', 'a', newline='') as file:
                 # x = str(datetime.datetime.now()) + string
             file.write(str(datetime.datetime.now()) + string + " Entry\n")
             time.sleep(int(execution_time))
@@ -44,7 +44,7 @@ class workflow_config(Task):
         #print(task_name)
         if activities["Type"] == "Flow":
             # print("***"+activities["Type"])
-            with open('logfile.txt', 'a', newline='') as file:
+            with open('logfile1B.txt', 'a', newline='') as file:
                 file.write(str(datetime.datetime.now()) + string + " Entry\n")
                 file.close()
             # print("####: \n", activities)
@@ -102,7 +102,7 @@ class workflow_config(Task):
                 #     t = threading.Thread(target=self.TimeFunction, args=(
                 #         fnc_input, execution_time, task_name, execution_type, string, num))
                 #     thread_list.append(t)
-            with open('logfile.txt', 'a', newline='') as file:
+            with open('logfile1B.txt', 'a', newline='') as file:
                 file.write(str(datetime.datetime.now()) 
                             + string + " Exit\n")
                 file.close()

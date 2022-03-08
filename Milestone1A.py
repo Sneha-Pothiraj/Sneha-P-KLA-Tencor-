@@ -10,8 +10,7 @@ class Task():
         pass
 
     def TimeFunction(self, fnc_input, execution_time, task_name, execution_type, string):
-        if(execution_type == 'Sequential'):
-            with open('logfile.txt', 'a', newline='') as file:
+            with open('logfile1A.txt', 'a', newline='') as file:
                 # x = str(datetime.datetime.now()) + string
                 file.write(str(datetime.datetime.now()) + string + " Entry\n")
                 time.sleep(int(execution_time))
@@ -20,7 +19,6 @@ class Task():
                 file.write(str(datetime.datetime.now()) + string + " Exit\n")
                 file.close()
                 # file.write(datetime.datetime.now() + ";M1A_Workflow Exit")
-        else:
 
 
 class workflow_config(Task):
@@ -35,13 +33,13 @@ class workflow_config(Task):
         self.dict_file = activities
         print(task_name)
         if self.dict_file["Type"] == "Flow":
-            with open('logfile.txt', 'a', newline='') as file:
+            with open('logfile1A.txt', 'a', newline='') as file:
                 file.write(str(datetime.datetime.now()) + string + " Entry\n")
                 file.close()
             exec_type = self.dict_file["Execution"]
             for t_name, values in self.dict_file["Activities"].items():
                 self.parsing_dict(values, t_name, exec_type, string+"."+t_name)
-            with open('logfile.txt', 'a', newline='') as file:
+            with open('logfile1A.txt', 'a', newline='') as file:
                 file.write(str(datetime.datetime.now())
                            + string + " Exit\n")
                 file.close()
