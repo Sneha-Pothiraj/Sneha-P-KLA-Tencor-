@@ -29,6 +29,14 @@ class Task():
 
     def DataLoad(self, fnc_input, task_name, execution_type, string):
         csv = fnc_input
+        with open('logfile2A.txt', 'a', newline='') as file:
+            # x = str(datetime.datetime.now()) + string
+            file.write(str(datetime.datetime.now()) + string + " Entry\n")
+            # time.sleep(int(execution_time))
+            file.write(str(datetime.datetime.now()) + string +
+                       " Executing DataLoad({})".format(fnc_input) + "\n")
+            file.write(str(datetime.datetime.now()) + string + " Exit\n")
+            file.close()
         df = pd.read_csv(csv)
         # dataload_map[string + ".NoOfDefects"] =
         self.dataload_map[string+"NoOfDefects"] = len(list(df))
@@ -63,14 +71,14 @@ class workflow_config(Task):
                             execution_time = inputs["ExecutionTime"]
                             t = threading.Thread(target=self.TimeFunction, args=(
                             fnc_input, execution_time, tn, None, string + "."+tn))
-                        else:
-                            inputs = values["Inputs"]
-                            fnc_input = inputs["Filename"]
-                            if not (values[task_name]["Condition"]):
-                                t = threading.Thread(target=self.DataLoad, args=(
-                                fnc_input, task_name, execution_type, string + "." + tn))
+
+
+                            if "Condition" not in values.keys():
+                                self.TimeFunction(
+                            fnc_input, execution_time, task_name, execution_type, string)
                             else:
-                                condition = values[task_name]["Condition"]
+                                # condition = values[task_name]["Condition"]
+                                condition = values["Condition"]
                                 r1 = condition.split("(")[1].split(")")
                                 key_v = r1[0]
                                 cond = r1[1].split()
@@ -79,24 +87,54 @@ class workflow_config(Task):
                                 if(key_v in self.dataload_map.keys()):
                                     x = f"self.dataload_map['{key_v}']{symbol}{number}"
                                     bool = eval(x)
+                                    print("\nCond\n", x)
                                     if(bool):
                                         self.DataLoad(fnc_input, task_name,
-                                          execution_type, string)
+                                                    execution_type, string)
                                     else:
                                         with open('logfile2A.txt', 'a', newline='') as file:
                                             file.write(
-                                    str(datetime.datetime.now()) + string + "Skipped\n")
+                                                str(datetime.datetime.now()) + string + "Skipped\n")
                                             file.write(
-                                    str(datetime.datetime.now()) + string + "Exit\n")
-                                    file.close()
+                                                str(datetime.datetime.now()) + string + "Exit\n")
+                                            file.close()
+
+                                else:
+                                    inputs = values["Inputs"]
+                                    fnc_input = inputs["Filename"]
+                                    if "Condition" not in values.keys():
+                                        t = threading.Thread(target=self.DataLoad, args=(
+                                        fnc_input, task_name, execution_type, string + "." + tn))
+                                    else:
+                                        # condition = values[task_name]["Condition"]
+                                        condition = values["Condition"]
+                                        r1 = condition.split("(")[1].split(")")
+                                        key_v = r1[0]
+                                        cond = r1[1].split()
+                                        symbol = cond[0]
+                                        number = cond[1]
+                                        if(key_v in self.dataload_map.keys()):
+                                            x = f"self.dataload_map['{key_v}']{symbol}{number}"
+                                            bool = eval(x)
+                                            print("\nCond\n", x)
+                                            if(bool):
+                                                t = threading.Thread(target=self.DataLoad, args=(
+                                                    fnc_input, task_name, execution_type, string + "." + tn)
+                                            else:
+                                                with open('logfile2A.txt', 'a', newline='') as file:
+                                                    file.write(
+                                                str(datetime.datetime.now()) + string + "Skipped\n")
+                                                    file.write(
+                                                str(datetime.datetime.now()) + string + "Exit\n")
+                                                    file.close()
                                 
                         # thread_list.append(t)
                         t.start()
-                    else:
-                        t = threading.Thread(target=self.parsing_dict, args=(
-                            values, tn, exec_type, string+"."+tn))
-                        t.start()
-                    thread_list.append(t)
+                            else:
+                                t = threading.Thread(target=self.parsing_dict, args=(
+                                    values, tn, exec_type, string+"."+tn))
+                                t.start()
+                            thread_list.append(t)
 
                 for x in range(len(thread_list)):
                     thread_list[x].join()
@@ -112,37 +150,64 @@ class workflow_config(Task):
         else:
             # task_name = dict_file[]
             fnc_name = activities["Function"]
-            if(fnc_name == "TimeFunction"):
-                inputs = activities["Inputs"]
-                fnc_input = inputs["FunctionInput"]
-                execution_time = inputs["ExecutionTime"]
-                self.TimeFunction(fnc_input, execution_time, task_name, execution_type, string)
-            
-            else:
-                inputs = activities["Inputs"]
-                fnc_input = inputs["Filename"]
-                print(activities[task_name].keys())
-                if "Condition" in activities[task_name].keys():
-                    self.DataLoad(fnc_input, task_name, execution_type, string)
+            if activities["Type"] == "Task":
+                if(fnc_name == "TimeFunction"):
+                    inputs = activities["Inputs"]
+                    fnc_input = inputs["FunctionInput"]
+                    execution_time = inputs["ExecutionTime"]
+                    print(activities)
+                    if "Condition" not in activities.keys():
+                        self.TimeFunction(
+                            fnc_input, execution_time, task_name, execution_type, string)
+                    else:
+                        condition = activities[task_name]["Condition"]
+                        r1 = condition.split("(")[1].split(")")
+                        key_v = r1[0]
+                        cond = r1[1].split()
+                        symbol = cond[0]
+                        number = cond[1]
+                        if(key_v in self.dataload_map.keys()):
+                            x = f"self.dataload_map['{key_v}']{symbol}{number}"
+                            print("\nCond\n", x)
+                            bool = eval(x)
+                            if(bool):
+                                self.DataLoad(fnc_input, task_name,
+                                              execution_type, string)
+                            else:
+                                with open('logfile2A.txt', 'a', newline='') as file:
+                                    file.write(
+                                        str(datetime.datetime.now()) + string + "Skipped\n")
+                                    file.write(
+                                        str(datetime.datetime.now()) + string + "Exit\n")
+                                    file.close()
+                    
+                
                 else:
-                    condition = activities[task_name]["Condition"]
-                    r1 = condition.split("(")[1].split(")")
-                    key_v = r1[0]
-                    cond = r1[1].split()
-                    symbol = cond[0]
-                    number = cond[1]
-                    if(key_v in self.dataload_map.keys()):
-                        x = f"self.dataload_map['{key_v}']{symbol}{number}"
-                        bool = eval(x)
-                        if(bool):
-                            self.DataLoad(fnc_input, task_name,
-                                          execution_type, string)
-                        else:
-                            with open('logfile2A.txt', 'a', newline='') as file:
-                                file.write(str(datetime.datetime.now()) + string + "Skipped\n")
-                                file.write(
-                                    str(datetime.datetime.now()) + string + "Exit\n")
-                                file.close()
+                    inputs = activities["Inputs"]
+                    fnc_input = inputs["Filename"]
+                    print("***",activities)
+                    if "Condition" not in activities.keys():
+                        self.DataLoad(fnc_input, task_name, execution_type, string)
+                    else:
+                        condition = activities[task_name]["Condition"]
+                        r1 = condition.split("(")[1].split(")")
+                        key_v = r1[0]
+                        cond = r1[1].split()
+                        symbol = cond[0]
+                        number = cond[1]
+                        if(key_v in self.dataload_map.keys()):
+                            x = f"self.dataload_map['{key_v}']{symbol}{number}"
+                            bool = eval(x)
+                            print("\nCond\n", x)
+                            if(bool):
+                                self.DataLoad(fnc_input, task_name,
+                                            execution_type, string)
+                            else:
+                                with open('logfile2A.txt', 'a', newline='') as file:
+                                    file.write(str(datetime.datetime.now()) + string + "Skipped\n")
+                                    file.write(
+                                        str(datetime.datetime.now()) + string + "Exit\n")
+                                    file.close()
                 # data_load_map[]
 
 
