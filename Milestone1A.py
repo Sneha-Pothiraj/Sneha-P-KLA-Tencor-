@@ -4,6 +4,7 @@ import logging
 import datetime
 from yaml.loader import SafeLoader
 
+
 class Task():
     def __init__(self):
         pass
@@ -20,17 +21,16 @@ class Task():
                 file.close()
                 # file.write(datetime.datetime.now() + ";M1A_Workflow Exit")
         else:
-            
-            
 
-            
+
 class workflow_config(Task):
 
     def __init__(self, dict_file):
-        self.dict_file=dict_file
+        self.dict_file = dict_file
         # self.task_name = task_name
         # self.execution_type = execution_type
         # self.string = string
+
     def parsing_dict(self, activities, task_name, execution_type, string):
         self.dict_file = activities
         print(task_name)
@@ -42,15 +42,17 @@ class workflow_config(Task):
             for t_name, values in self.dict_file["Activities"].items():
                 self.parsing_dict(values, t_name, exec_type, string+"."+t_name)
             with open('logfile.txt', 'a', newline='') as file:
-                file.write(str(datetime.datetime.now()) 
-                            + string + " Exit\n")
+                file.write(str(datetime.datetime.now())
+                           + string + " Exit\n")
                 file.close()
         else:
             # task_name = dict_file[]
             inputs = self.dict_file["Inputs"]
             fnc_input = inputs["FunctionInput"]
             execution_time = inputs["ExecutionTime"]
-            self.TimeFunction(fnc_input, execution_time, task_name, execution_type, string)
+            self.TimeFunction(fnc_input, execution_time,
+                              task_name, execution_type, string)
+
 
 def main():
     stream = open("Milestone1A.yaml", 'r')
@@ -69,6 +71,7 @@ def main():
     # with open('logfile.txt', 'a', newline='') as file:
     #     file.write(str(datetime.datetime.now())+";Milestone1A Exit\n")
     #     file.close()
+
 
 if __name__ == "__main__":
     main()
